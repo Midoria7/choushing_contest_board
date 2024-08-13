@@ -68,11 +68,11 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="bg-custom-gradient min-h-screen flex flex-col items-center p-4">
       {competitionInfo && (
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-5 mt-5">{competitionInfo.competition_name}</h1>
-          <p className="text-lg text-gray-700">{competitionInfo.description}</p>
+        <div className="bg-white shadow-md rounded-lg p-6 mt-8 mb-4 w-full max-w-4xl text-center">
+          <h1 className="text-4xl font-bold mb-3 text-blue-900">{competitionInfo.competition_name} 实时榜单</h1>
+          <p className="text-lg text-gray-800 break-words">{competitionInfo.description}</p>
         </div>
       )}
       <LeaderboardTable leaderboard={leaderboard} problems={competitionInfo?.problems || []} />

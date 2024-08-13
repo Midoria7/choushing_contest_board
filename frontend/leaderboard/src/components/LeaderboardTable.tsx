@@ -50,36 +50,41 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, proble
   });
 
   return (
-    <table className="min-w-full bg-white border border-gray-200">
-      <thead>
-        {table.getHeaderGroups().map(headerGroup => (
-          <tr key={headerGroup.id} className="bg-gray-100">
-            {headerGroup.headers.map(header => (
-              <th
-                key={header.id}
-                className="py-2 px-4 border-b border-gray-200 text-left text-sm font-semibold text-gray-600"
-              >
-                {flexRender(header.column.columnDef.header, header.getContext())}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody>
-        {table.getRowModel().rows.map(row => (
-          <tr key={row.id} className="hover:bg-gray-50">
-            {row.getVisibleCells().map(cell => (
-              <td
-                key={cell.id}
-                className="py-2 px-4 border-b border-gray-200 text-sm text-gray-700"
-              >
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div className="bg-white shadow-md rounded-lg w-full max-w-4xl overflow-hidden">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gradient-to-r from-indigo-500 to-blue-600">
+          {table.getHeaderGroups().map(headerGroup => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map(header => (
+                <th
+                  key={header.id}
+                  className="px-6 py-3 text-center text-xs font-bold text-white uppercase tracking-wider"
+                >
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {table.getRowModel().rows.map((row, index) => (
+            <tr
+              key={row.id}
+              className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100`}
+            >
+              {row.getVisibleCells().map(cell => (
+                <td
+                  key={cell.id}
+                  className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-800"
+                >
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
