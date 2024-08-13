@@ -63,7 +63,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, proble
   return (
     <div className="bg-white shadow-md rounded-lg w-full max-w-4xl overflow-hidden">
       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gradient-to-r from-indigo-500 to-blue-600">
+        <thead className="bg-gradient-to-r from-indigo-400 to-blue-600">
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => (

@@ -25,7 +25,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchCompetitionInfo = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/competition_info');
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/competition_info`);
         setCompetitionInfo(response.data);
       } catch (error) {
         console.error('Error fetching competition info:', error);
@@ -34,7 +34,7 @@ const App: React.FC = () => {
 
     const fetchLeaderboard = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/leaderboard');
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/leaderboard`);
         const data = response.data;
 
         // 合并同一用户的成绩
@@ -94,7 +94,7 @@ const App: React.FC = () => {
     <div className="bg-custom-gradient min-h-screen flex flex-col items-center p-4">
       {competitionInfo && (
         <div className="bg-white shadow-md rounded-lg p-6 mt-8 mb-4 w-full max-w-4xl text-center">
-          <h1 className="text-4xl font-bold mt-3 mb-3 text-blue-900">{competitionInfo.competition_name} 实时榜单</h1>
+          <h1 className="text-4xl font-bold mt-3 mb-3 bg-clip-text bg-gradient-to-r from-blue-900 to-blue-500 text-transparent">{competitionInfo.competition_name} 实时榜单</h1>
           <p className="text-lg text-gray-800 break-words mb-4">{competitionInfo.description}</p>
           <div className="w-full bg-gray-300 rounded-full h-4 mb-4 relative">
             <div
