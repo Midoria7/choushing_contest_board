@@ -79,7 +79,9 @@ def get_competition_info():
     return jsonify({
         'competition_name': config['competition_name'],
         'description': config['description'],
-        'problems': config['problems']
+        'problems': config['problems'],
+        'start_time': config['start_time'],
+        'end_time': config['end_time']
     })
 
 # GET 请求：获取排榜信息
