@@ -1,8 +1,13 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import sqlite3
 import json
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
+
+# Optionally, you can specify origins
+# CORS(app, origins=["http://localhost:5173"])
 
 # 加载配置文件
 with open('config.json', 'r', encoding='utf-8') as f:
