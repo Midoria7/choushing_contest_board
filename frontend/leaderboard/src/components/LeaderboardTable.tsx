@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
+  getSortedRowModel,
   ColumnDef,
+  SortingState,
   flexRender,
 } from '@tanstack/react-table';
 
@@ -18,16 +20,20 @@ interface LeaderboardTableProps {
 }
 
 const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, problems }) => {
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   const columns: ColumnDef<LeaderboardEntry>[] = [
     {
       header: '排名',
       accessorFn: (_, i) => i + 1,
       id: 'rank',
+      enableSorting: false,
       cell: info => info.getValue(),
     },
     {
       header: '用户名',
       accessorKey: 'username',
+      enableSorting: false,
       cell: info => info.getValue(),
     },
     {
@@ -46,7 +52,12 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, proble
   const table = useReactTable({
     data: leaderboard,
     columns,
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
@@ -58,9 +69,14 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, proble
               {headerGroup.headers.map(header => (
                 <th
                   key={header.id}
-                  className="px-6 py-3 text-center text-xs font-bold text-white uppercase tracking-wider"
+                  onClick={header.column.getToggleSortingHandler()}
+                  className="px-6 py-3 text-center text-xs font-bold text-white uppercase tracking-wider cursor-pointer select-none"
                 >
                   {flexRender(header.column.columnDef.header, header.getContext())}
+                  {{
+                    asc: ' 🔼',
+                    desc: ' 🔽',
+                  }[header.column.getIsSorted() as string] ?? null}
                 </th>
               ))}
             </tr>
@@ -70,7 +86,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, proble
           {table.getRowModel().rows.map((row, index) => (
             <tr
               key={row.id}
-              className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100`}
+              className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-200`}
             >
               {row.getVisibleCells().map(cell => (
                 <td

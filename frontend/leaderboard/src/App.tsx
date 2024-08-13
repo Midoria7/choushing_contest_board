@@ -71,7 +71,7 @@ const App: React.FC = () => {
     <div className="bg-custom-gradient min-h-screen flex flex-col items-center p-4">
       {competitionInfo && (
         <div className="bg-white shadow-md rounded-lg p-6 mt-8 mb-4 w-full max-w-4xl text-center">
-          <h1 className="text-4xl font-bold mb-3 text-blue-900">{competitionInfo.competition_name} 实时榜单</h1>
+          <h1 className="text-4xl font-bold mt-2 mb-3 text-blue-900">{competitionInfo.competition_name} 实时榜单</h1>
           <p className="text-lg text-gray-800 break-words">{competitionInfo.description}</p>
         </div>
       )}
