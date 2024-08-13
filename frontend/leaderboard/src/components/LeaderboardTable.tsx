@@ -7,6 +7,8 @@ import {
   SortingState,
   flexRender,
 } from '@tanstack/react-table';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSortUp, faSortDown, faSort} from '@fortawesome/free-solid-svg-icons';
 
 interface LeaderboardEntry {
   username: string;
@@ -20,7 +22,22 @@ interface LeaderboardTableProps {
 }
 
 const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, problems }) => {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: 'totalScore', desc: true } // 默认按总分降序排列
+  ]);
+
+  const toggleSorting = (columnId: string) => {
+    setSorting((prevSorting) => {
+      const currentSort = prevSorting.find((sort) => sort.id === columnId);
+      if (!currentSort) {
+        return [{ id: columnId, desc: true }]; // 如果未排序，则升序排列
+      } else if (!currentSort.desc) {
+        return [{ id: columnId, desc: true }]; // 如果当前为升序，改为降序
+      } else {
+        return [{ id: columnId, desc: false }]; // 如果当前为降序，改为升序
+      }
+    });
+  };
 
   const columns: ColumnDef<LeaderboardEntry>[] = [
     {
@@ -63,20 +80,28 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, proble
   return (
     <div className="bg-white shadow-md rounded-lg w-full max-w-4xl overflow-hidden">
       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gradient-to-r from-indigo-400 to-blue-600">
+        <thead className="bg-gradient-to-r from-indigo-500 to-blue-600">
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => (
                 <th
                   key={header.id}
-                  onClick={header.column.getToggleSortingHandler()}
+                  onClick={() => toggleSorting(header.id as string)}
                   className="px-6 py-3 text-center text-xs font-bold text-white uppercase tracking-wider cursor-pointer select-none"
                 >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                  {{
-                    asc: ' 🔼',
-                    desc: ' 🔽',
-                  }[header.column.getIsSorted() as string] ?? null}
+                  <div className="flex items-center justify-center">
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                    {/* {header.column.getIsSorted() ? (
+                      header.column.getIsSorted() === 'asc' ? (
+                        <FontAwesomeIcon icon={faSortUp} className="ml-2" />
+                      ) : (
+                        <FontAwesomeIcon icon={faSortDown} className="ml-2" />
+                      )
+                    ) : null} */}
+                    {header.column.getIsSorted() ? (
+                      <FontAwesomeIcon icon={faSort} className="ml-2" />
+                    ) : null}
+                  </div>
                 </th>
               ))}
             </tr>
