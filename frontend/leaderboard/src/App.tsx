@@ -13,6 +13,7 @@ interface CompetitionInfo {
 }
 
 interface LeaderboardEntry {
+  onlyid: string;
   username: string;
   totalScore: number;
   scores: Record<string, number>;
@@ -38,15 +39,16 @@ const App: React.FC = () => {
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/leaderboard`);
         const data = response.data;
 
-        // 合并同一用户的成绩
+        // 合并同一用户（通过 onlyid）的成绩
         const userScores: Record<string, LeaderboardEntry> = {};
 
         Object.entries(data).forEach(([problem, entries]: [string, any]) => {
           entries.forEach((entry: any) => {
-            const { username, score } = entry;
+            const { onlyid, username, score } = entry;
 
-            if (!userScores[username]) {
-              userScores[username] = {
+            if (!userScores[onlyid]) {
+              userScores[onlyid] = {
+                onlyid,
                 username,
                 totalScore: 0,
                 scores: {},
@@ -54,8 +56,8 @@ const App: React.FC = () => {
             }
 
             // 更新该用户的分数
-            userScores[username].scores[problem] = score;
-            userScores[username].totalScore += score;
+            userScores[onlyid].scores[problem] = score;
+            userScores[onlyid].totalScore += score;
           });
         });
 

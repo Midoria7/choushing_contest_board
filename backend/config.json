@@ -1,5 +1,5 @@
 {
-    "port": 3000,
+    "port": 5000,
     "debug": true,
     "competition_name": "ZXHPC 2024",
     "description": "2024 周行高性能计算选拔赛",
@@ -17,6 +17,7 @@
     "feishu_app_secret": "BUwJ6aAIqBYvkE59NDHn1bb8MLeMB3of",
     "feishu_app_token": "StmrbpD2XaEF18snODTcIV4inFe",
     "feishu_table_id": "tbl0vUdCsrLSBrhn",
-    "feishu_query_key_name": "兑换码",
-    "feishu_query_value_name": "分配用户"
+    "feishu_query_token_name": "兑换码",
+    "feishu_query_onlyid_name": "学号",
+    "feishu_query_username_name": "用户名"
 }
