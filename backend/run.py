@@ -10,16 +10,21 @@ with open('config.json', 'r', encoding='utf-8') as f:
     config = json.load(f)
 
 # 从配置文件中读取配置参数
+PORT = config['port']
+DEBUG = config['debug']
 COMPETITION_NAME = config['competition_name']
 DESCRIPTION = config['description']
 PROBLEMS = config['problems']
 START_TIME = config['start_time']
 END_TIME = config['end_time']
+IS_AUTH_ENABLED = config['is_auth_enabled']
 ADMIN_TOKEN = config['admin_token']
 FEISHU_APP_ID = config['feishu_app_id']
 FEISHU_APP_SECRET = config['feishu_app_secret']
 FEISHU_APP_TOKEN = config['feishu_app_token']
 FEISHU_TABLE_ID = config['feishu_table_id']
+FEISHU_QUERY_KEY_NAME = config['feishu_query_key_name']
+FEISHU_QUERYVALUE_NAME = config['feishu_query_value_name']
 
 # 全局变量来存储 Feishu token 和过期时间
 feishu_tenant_access_token = None
@@ -65,12 +70,12 @@ def get_username_by_token(token):
     }
 
     body = {
-        "field_names": ["兑换码", "分配用户"],
+        "field_names": [FEISHU_QUERY_KEY_NAME, FEISHU_QUERYVALUE_NAME],
         "filter": {
             "conjunction": "and",
             "conditions": [
                 {
-                    "field_name": "兑换码",
+                    "field_name": FEISHU_QUERY_KEY_NAME,
                     "operator": "is",
                     "value": [token]
                 }
@@ -86,7 +91,7 @@ def get_username_by_token(token):
         raise Exception(f"Failed to get user by token: {data['msg']}")
 
     record = data["data"]["items"][0]
-    username = record["fields"]["分配用户"][0]["text"]
+    username = record["fields"][FEISHU_QUERYVALUE_NAME][0]["text"]
 
     return username
 
@@ -151,30 +156,38 @@ def submit_score():
     token = data.get('token')
     username = data.get('username')
 
-    if not problem_name or not score or not token:
+    if not problem_name or not score:
         return jsonify({'error': 'Missing required parameters'}), 400
 
     # 检查题名是否合法
     if problem_name not in PROBLEMS:
         return jsonify({'error': 'Invalid problem name'}), 400
 
-    # 检查是否是管理员
-    if token == ADMIN_TOKEN:
-        if not username:
-            return jsonify({'error': 'Username is required for admin submissions'}), 400
+    if IS_AUTH_ENABLED:
+        # 启用认证
+        if not token:
+            return jsonify({'error': 'Token is required'}), 400
+        
+        if token == ADMIN_TOKEN:
+            if not username:
+                return jsonify({'error': 'Username is required for admin submissions'}), 400
+        else:
+            # 普通用户，通过兑换码查询用户名
+            try:
+                assigned_username = get_username_by_token(token)
+            except Exception as e:
+                return jsonify({'error': str(e)}), 400
+
+            # 如果用户名存在，检查是否与查询到的用户名匹配
+            if username and username != assigned_username:
+                return jsonify({'error': 'Username does not match the assigned user'}), 400
+
+            # 使用查询到的用户名
+            username = assigned_username
     else:
-        # 普通用户，通过兑换码查询用户名
-        try:
-            assigned_username = get_username_by_token(token)
-        except Exception as e:
-            return jsonify({'error': str(e)}), 400
-
-        # 如果用户名存在，检查是否与查询到的用户名匹配
-        if username and username != assigned_username:
-            return jsonify({'error': 'Username does not match the assigned user'}), 400
-
-        # 使用查询到的用户名
-        username = assigned_username
+        # 如果认证未启用，直接使用提供的用户名
+        if not username:
+            return jsonify({'error': 'Username is required'}), 400
 
     upsert_submission(username, problem_name, score)
     return jsonify({'message': '提交成功'}), 200
@@ -212,5 +225,4 @@ def get_leaderboard():
 
 if __name__ == '__main__':
     init_db()
-    # app.run(debug=True)
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=PORT, debug=DEBUG)
