@@ -1,12 +1,12 @@
 {
-    "competition_name": "编程比赛",
-    "description": "这是一个激动人心的编程比赛。",
+    "competition_name": "ZXHPC 2024",
+    "description": "2024 周行高性能计算选拔赛",
     "problems": [
       "题目一",
       "题目二",
       "题目三"
     ],
-    "start_time": "2024-08-17T15:00:00+08:00",
+    "start_time": "2024-08-01T15:00:00+08:00",
     "end_time": "2024-08-24T15:00:00+08:00",
     "authenticity_token": ""
 }

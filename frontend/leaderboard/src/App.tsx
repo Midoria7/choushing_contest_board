@@ -91,21 +91,41 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="bg-custom-gradient min-h-screen flex flex-col items-center p-4">
+    <div className="bg-custom-gradient-blue-sky min-h-screen flex flex-col items-center p-4">
       {competitionInfo && (
         <div className="bg-white shadow-md rounded-lg p-6 mt-8 mb-4 w-full max-w-4xl text-center">
-          <h1 className="text-4xl font-bold mt-3 mb-3 bg-clip-text bg-gradient-to-r from-blue-900 to-blue-500 text-transparent">{competitionInfo.competition_name} 实时榜单</h1>
+          <h1 className="text-4xl font-bold mt-3 mb-3 bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-600 text-transparent">
+            {competitionInfo.competition_name} 实时榜单
+          </h1>
           <p className="text-lg text-gray-800 break-words mb-4">{competitionInfo.description}</p>
           <div className="w-full bg-gray-300 rounded-full h-4 mb-4 relative">
             <div
               className="bg-gradient-to-r from-green-400 to-blue-500 h-4 rounded-full transition-width duration-500"
               style={{ width: `${calculateProgress()}%` }}
             ></div>
-            <div className="absolute left-0 top-6 text-xs text-gray-600">
-              {formatDate(competitionInfo.start_time)}
-            </div>
-            <div className="absolute right-0 top-6 text-xs text-gray-600">
-              {formatDate(competitionInfo.end_time)}
+            <div
+              className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full shadow-lg border border-gray-300"
+              style={{ left: `${Math.max(calculateProgress() - 1, 0)}%`, transform: 'translate(-50%, -50%)' }}
+            ></div>
+            <div className="flex absolute top-6 w-full text-xs text-gray-600">
+              <div className="flex-1 text-left">
+                {formatDate(competitionInfo.start_time)}
+              </div>
+              <div className="flex-1 text-center">
+                {(() => {
+                  const progress = calculateProgress();
+                  if (progress === 100) {
+                    return <span>已结束</span>;
+                  } else if (progress === 0) {
+                    return <span>未开始</span>;
+                  } else {
+                    return <span>进行中</span>;
+                  }
+                })()}
+              </div>
+              <div className="flex-1 text-right">
+                {formatDate(competitionInfo.end_time)}
+              </div>
             </div>
           </div>
         </div>
