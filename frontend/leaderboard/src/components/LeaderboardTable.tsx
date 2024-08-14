@@ -8,7 +8,7 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSortUp, faSortDown, faSort} from '@fortawesome/free-solid-svg-icons';
+import { faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 
 interface LeaderboardEntry {
   username: string;
@@ -25,12 +25,13 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, proble
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'totalScore', desc: true } // 默认按总分降序排列
   ]);
+  const [rotation, setRotation] = useState({ x: 0, y: 0 });
 
   const toggleSorting = (columnId: string) => {
     setSorting((prevSorting) => {
       const currentSort = prevSorting.find((sort) => sort.id === columnId);
       if (!currentSort) {
-        return [{ id: columnId, desc: true }]; // 如果未排序，则升序排列
+        return [{ id: columnId, desc: true }]; // 如果未排序，则降序排列
       } else if (!currentSort.desc) {
         return [{ id: columnId, desc: true }]; // 如果当前为升序，改为降序
       } else {
@@ -39,18 +40,36 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, proble
     });
   };
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left; // 鼠标相对于 div 左上角的水平位置
+    const y = e.clientY - rect.top;  // 鼠标相对于 div 左上角的垂直位置
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = (centerY - y) / centerY * 0.5;
+    const rotateY = (x - centerX) / centerX * 0.5;
+
+    setRotation({ x: rotateX, y: rotateY });
+  };
+
+  const handleMouseLeave = () => {
+    setRotation({ x: 0, y: 0 }); // 鼠标离开时重置旋转
+  };
+
   const columns: ColumnDef<LeaderboardEntry>[] = [
     {
       header: '排名',
       accessorFn: (_, i) => i + 1,
       id: 'rank',
-      enableSorting: false,
+      enableSorting: false, // 禁止排序
       cell: info => info.getValue(),
     },
     {
       header: '用户名',
       accessorKey: 'username',
-      enableSorting: false,
+      enableSorting: false, // 禁止排序
       cell: info => info.getValue(),
     },
     {
@@ -78,7 +97,18 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, proble
   });
 
   return (
-    <div className="bg-white shadow-md rounded-lg w-full max-w-4xl overflow-hidden">
+    <div 
+      className="bg-white bg-opacity-70 shadow-lg rounded-lg w-full max-w-4xl overflow-x-auto"
+      style={{
+        transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+        transition: 'transform 0.1s ease-out',
+        willChange: 'transform',
+        WebkitFontSmoothing: 'antialiased',
+        WebkitBackfaceVisibility: 'hidden',
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gradient-to-r from-indigo-500 to-blue-600">
           {table.getHeaderGroups().map(headerGroup => (
@@ -86,21 +116,18 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, proble
               {headerGroup.headers.map(header => (
                 <th
                   key={header.id}
-                  onClick={() => toggleSorting(header.id as string)}
+                  onClick={header.column.getCanSort() ? () => toggleSorting(header.id as string) : undefined}
                   className="px-6 py-3 text-center text-xs font-bold text-white uppercase tracking-wider cursor-pointer select-none"
                 >
                   <div className="flex items-center justify-center">
                     {flexRender(header.column.columnDef.header, header.getContext())}
-                    {/* {header.column.getIsSorted() ? (
-                      header.column.getIsSorted() === 'asc' ? (
-                        <FontAwesomeIcon icon={faSortUp} className="ml-2" />
-                      ) : (
+                    {header.column.getCanSort() && sorting[0]?.id === header.id && (
+                      sorting[0]?.desc ? (
                         <FontAwesomeIcon icon={faSortDown} className="ml-2" />
+                      ) : (
+                        <FontAwesomeIcon icon={faSortUp} className="ml-2" />
                       )
-                    ) : null} */}
-                    {header.column.getIsSorted() ? (
-                      <FontAwesomeIcon icon={faSort} className="ml-2" />
-                    ) : null}
+                    )}
                   </div>
                 </th>
               ))}

@@ -21,6 +21,7 @@ interface LeaderboardEntry {
 const App: React.FC = () => {
   const [competitionInfo, setCompetitionInfo] = useState<CompetitionInfo | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [rotation, setRotation] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const fetchCompetitionInfo = async () => {
@@ -87,13 +88,42 @@ const App: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return format(parseISO(dateString), 'yyyy年MM月dd日 HH:mm', { locale: zhCN });
+    return format(parseISO(dateString), 'yyyy.MM.dd HH:mm', { locale: zhCN });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left; // 鼠标相对于 div 左上角的水平位置
+    const y = e.clientY - rect.top;  // 鼠标相对于 div 左上角的垂直位置
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = (centerY - y) / centerY * 0.5;
+    const rotateY = (x - centerX) / centerX * 0.5;
+
+    setRotation({ x: rotateX, y: rotateY });
+  };
+
+  const handleMouseLeave = () => {
+    setRotation({ x: 0, y: 0 }); // 鼠标离开时重置旋转
   };
 
   return (
     <div className="bg-custom-gradient-blue-sky min-h-screen flex flex-col items-center p-4">
       {competitionInfo && (
-        <div className="bg-white shadow-md rounded-lg p-6 mt-8 mb-4 w-full max-w-4xl text-center">
+        <div 
+          className="bg-white bg-opacity-80 shadow-lg rounded-lg p-6 mt-8 mb-4 w-full max-w-4xl text-center backdrop-filter backdrop-blur-lg backdrop-brightness-125 border border-white border-opacity-25"
+          style={{
+            transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+            transition: 'transform 0.1s ease-out',
+            willChange: 'transform',
+            WebkitFontSmoothing: 'antialiased',
+            WebkitBackfaceVisibility: 'hidden',
+          }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        >
           <h1 className="text-4xl font-bold mt-3 mb-3 bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-600 text-transparent">
             {competitionInfo.competition_name} 实时榜单
           </h1>
