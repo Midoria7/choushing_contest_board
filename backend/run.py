@@ -91,6 +91,41 @@ def get_user_info_by_token(token):
 
     return onlyid, username
 
+def get_username_by_onlyid(onlyid):
+    feishu_token = get_feishu_token()
+    url = f"https://open.feishu.cn/open-apis/bitable/v1/apps/{FEISHU_APP_TOKEN}/tables/{FEISHU_TABLE_ID}/records/search"
+    
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {feishu_token}"
+    }
+
+    body = {
+        "field_names": [FEISHU_QUERY_ONLYID_NAME, FEISHU_QUERY_USERNAME_NAME],
+        "filter": {
+            "conjunction": "and",
+            "conditions": [
+                {
+                    "field_name": FEISHU_QUERY_ONLYID_NAME,
+                    "operator": "is",
+                    "value": [onlyid]
+                }
+            ]
+        },
+        "automatic_fields": True
+    }
+
+    response = requests.post(url, json=body, headers=headers)
+    data = response.json()
+
+    if data["code"] != 0 or len(data["data"]["items"]) == 0:
+        raise Exception(f"Failed to get username by onlyid: {data['msg']}")
+
+    record = data["data"]["items"][0]
+    username = record["fields"][FEISHU_QUERY_USERNAME_NAME][0]["text"]
+
+    return username
+
 app = Flask(__name__)
 CORS(app)
 
@@ -153,9 +188,19 @@ def submit_score():
 
     if IS_AUTH_ENABLED:
         if token == ADMIN_TOKEN:
-            if not onlyid or not username:
-                return jsonify({'error': 'Onlyid and username are required for admin submissions'}), 400
+            if not onlyid:
+                return jsonify({'error': 'Onlyid is required for admin submissions'}), 400
+            
+            try:
+                assigned_username = get_username_by_onlyid(onlyid)
+                if username and username != assigned_username:
+                    return jsonify({'error': 'Username does not match the assigned user'}), 400
+                username = assigned_username
+            except Exception as e:
+                return jsonify({'error': str(e)}), 400
+
         else:
+            # 普通用户，通过兑换码查询用户名和学号
             try:
                 assigned_onlyid, assigned_username = get_user_info_by_token(token)
             except Exception as e:
@@ -174,6 +219,7 @@ def submit_score():
 
     upsert_submission(onlyid, username, problem_name, score)
     return jsonify({'message': '提交成功'}), 200
+
 
 @app.route('/competition_info', methods=['GET'])
 def get_competition_info():
