@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
-import zhCN from 'date-fns/locale/zh-CN';
 import LeaderboardTable from './components/LeaderboardTable';
 
 interface CompetitionInfo {
@@ -27,7 +26,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchCompetitionInfo = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/competition_info`);
+        const response = await axios.get(`/api/competition_info`);
         setCompetitionInfo(response.data);
       } catch (error) {
         console.error('Error fetching competition info:', error);
@@ -36,13 +35,15 @@ const App: React.FC = () => {
 
     const fetchLeaderboard = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/leaderboard`);
+        const response = await axios.get(`/api/leaderboard`);
         const data = response.data;
 
         // 合并同一用户（通过 onlyid）的成绩
         const userScores: Record<string, LeaderboardEntry> = {};
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Object.entries(data).forEach(([problem, entries]: [string, any]) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           entries.forEach((entry: any) => {
             const { onlyid, username, score } = entry;
 
@@ -90,7 +91,7 @@ const App: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return format(parseISO(dateString), 'yyyy.MM.dd HH:mm', { locale: zhCN });
+    return format(parseISO(dateString), 'yyyy.MM.dd HH:mm');
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {

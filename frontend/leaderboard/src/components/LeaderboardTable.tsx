@@ -81,7 +81,8 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, proble
       header: problem,
       accessorFn: (row: LeaderboardEntry) => row.scores[problem] || 0,
       id: problem,
-      cell: info => info.getValue(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      cell: (info: any) => info.getValue(),
     })),
   ];
 
