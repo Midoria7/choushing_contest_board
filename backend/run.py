@@ -4,6 +4,7 @@ import time
 from flask_cors import CORS
 import requests
 from flask import Flask, request, jsonify
+from datetime import datetime, timezone, timedelta
 
 # 加载配置文件
 with open('config.json', 'r', encoding='utf-8') as f:
@@ -126,6 +127,12 @@ def get_username_by_onlyid(onlyid):
 
     return username
 
+def calculate_submission_time():
+    start_time = datetime.fromisoformat(START_TIME).replace(tzinfo=timezone.utc)
+    now = datetime.now(timezone(timedelta(hours=8)))  # 使用 UTC+8 时区
+    print("submit time:" + str(int((now - start_time).total_seconds())))
+    return int((now - start_time).total_seconds())
+
 app = Flask(__name__)
 CORS(app)
 
@@ -138,35 +145,37 @@ def init_db():
             onlyid TEXT NOT NULL,
             username TEXT NOT NULL,
             problem_name TEXT NOT NULL,
-            score INTEGER NOT NULL
+            score INTEGER NOT NULL,
+            submission_time INTEGER NOT NULL
         )
     ''')
     conn.commit()
     conn.close()
 
-def upsert_submission(onlyid, username, problem_name, score):
+def upsert_submission(onlyid, username, problem_name, score, submission_time):
     conn = sqlite3.connect('competition.db')
     c = conn.cursor()
 
     c.execute('''
-        SELECT score FROM submissions
+        SELECT score, submission_time FROM submissions
         WHERE onlyid = ? AND problem_name = ?
     ''', (onlyid, problem_name))
     row = c.fetchone()
 
     if row is None:
         c.execute('''
-            INSERT INTO submissions (onlyid, username, problem_name, score)
-            VALUES (?, ?, ?, ?)
-        ''', (onlyid, username, problem_name, score))
+            INSERT INTO submissions (onlyid, username, problem_name, score, submission_time)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (onlyid, username, problem_name, score, submission_time))
     else:
         existing_score = row[0]
+        existing_time = row[1]
         if score > existing_score:
             c.execute('''
                 UPDATE submissions
-                SET score = ?, username = ?
+                SET score = ?, submission_time = ?, username = ?
                 WHERE onlyid = ? AND problem_name = ?
-            ''', (score, username, onlyid, problem_name))
+            ''', (score, submission_time, username, onlyid, problem_name))
 
     conn.commit()
     conn.close()
@@ -180,11 +189,19 @@ def submit_score():
     onlyid = data.get('onlyid')
     username = data.get('username')
 
-    if not problem_name or not score:
+    if not problem_name or score is None:
         return jsonify({'error': 'Missing required parameters'}), 400
+
+    if score < 0:
+        return jsonify({'error': 'Score must be a non-negative integer'}), 400
+    
+    if score == 0:
+        return jsonify({'message': 'score is 0, not submit'}), 200
 
     if problem_name not in PROBLEMS:
         return jsonify({'error': 'Invalid problem name'}), 400
+
+    submission_time = calculate_submission_time()
 
     if IS_AUTH_ENABLED:
         if token == ADMIN_TOKEN:
@@ -217,9 +234,8 @@ def submit_score():
         if not onlyid or not username:
             return jsonify({'error': 'Onlyid and username are required'}), 400
 
-    upsert_submission(onlyid, username, problem_name, score)
+    upsert_submission(onlyid, username, problem_name, score, submission_time)
     return jsonify({'message': '提交成功'}), 200
-
 
 @app.route('/competition_info', methods=['GET'])
 def get_competition_info():
@@ -239,14 +255,14 @@ def get_leaderboard():
 
     for problem in config['problems']:
         c.execute('''
-            SELECT onlyid, username, MAX(score) as max_score
+            SELECT onlyid, username, MAX(score) as max_score, MIN(submission_time) as min_submission_time
             FROM submissions
             WHERE problem_name = ?
             GROUP BY onlyid, username
-            ORDER BY max_score DESC
+            ORDER BY max_score DESC, min_submission_time ASC
         ''', (problem,))
         problem_leaderboards[problem] = [
-            {'onlyid': row[0], 'username': row[1], 'score': row[2]} 
+            {'onlyid': row[0], 'username': row[1], 'score': row[2], 'submission_time': row[3]} 
             for row in c.fetchall()
         ]
 
