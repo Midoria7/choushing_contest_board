@@ -4,15 +4,14 @@
     "competition_name": "ZXHPC 2024",
     "description": "2024 周行高性能计算选拔赛",
     "problems": [
-      "题目一",
-      "题目二",
-      "题目三"
+      "pi",
+      "knapsack"
     ],
     "start_time": "2024-08-01T15:00:00+08:00",
     "end_time": "2024-08-24T15:00:00+08:00",
 
     "is_auth_enabled": true,
-    "admin_token": "0123456",
+    "admin_token": "7a67c9d1fc63a2361861",
     "feishu_app_id": "cli_a63c87f17939900c",
     "feishu_app_secret": "BUwJ6aAIqBYvkE59NDHn1bb8MLeMB3of",
     "feishu_app_token": "StmrbpD2XaEF18snODTcIV4inFe",

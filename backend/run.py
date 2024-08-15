@@ -82,8 +82,11 @@ def get_user_info_by_token(token):
     response = requests.post(url, json=body, headers=headers)
     data = response.json()
 
-    if data["code"] != 0 or len(data["data"]["items"]) == 0:
+    if data["code"] != 0:
         raise Exception(f"Failed to get user info by token: {data['msg']}")
+    
+    if len(data["data"]["items"]) == 0:
+        raise Exception("Cannot find user info by token")
 
     record = data["data"]["items"][0]
     onlyid = record["fields"][FEISHU_QUERY_ONLYID_NAME][0]["text"]
