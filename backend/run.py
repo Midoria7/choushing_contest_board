@@ -272,6 +272,7 @@ def get_leaderboard():
     conn.close()
     return jsonify(problem_leaderboards)
 
+init_db()
+
 if __name__ == '__main__':
-    init_db()
     app.run(host='0.0.0.0', port=config['port'], debug=config['debug'])
