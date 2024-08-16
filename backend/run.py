@@ -141,6 +141,8 @@ CORS(app)
 def init_db():
     conn = sqlite3.connect('competition.db')
     c = conn.cursor()
+    
+    # 初始化 submissions 表
     c.execute('''
         CREATE TABLE IF NOT EXISTS submissions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -152,6 +154,20 @@ def init_db():
             log TEXT NOT NULL
         )
     ''')
+
+    # 初始化 submissionrecords 表
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS submissionrecords (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            onlyid TEXT NOT NULL,
+            username TEXT NOT NULL,
+            problem_name TEXT NOT NULL,
+            score INTEGER NOT NULL,
+            submission_time INTEGER NOT NULL,
+            log TEXT NOT NULL
+        )
+    ''')
+    
     conn.commit()
     conn.close()
 
@@ -159,6 +175,7 @@ def upsert_submission(onlyid, username, problem_name, score, submission_time, lo
     conn = sqlite3.connect('competition.db')
     c = conn.cursor()
 
+    # 更新 submissions 表
     c.execute('''
         SELECT score, submission_time FROM submissions
         WHERE onlyid = ? AND problem_name = ?
@@ -179,6 +196,12 @@ def upsert_submission(onlyid, username, problem_name, score, submission_time, lo
                 SET score = ?, submission_time = ?, username = ?, log = ?
                 WHERE onlyid = ? AND problem_name = ?
             ''', (score, submission_time, username, log, onlyid, problem_name))
+
+    # 插入记录到 submissionrecords 表
+    c.execute('''
+        INSERT INTO submissionrecords (onlyid, username, problem_name, score, submission_time, log)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (onlyid, username, problem_name, score, submission_time, log))
 
     conn.commit()
     conn.close()
