@@ -133,7 +133,6 @@ def get_username_by_onlyid(onlyid):
 def calculate_submission_time():
     start_time = datetime.fromisoformat(START_TIME).astimezone(timezone(timedelta(hours=8)))
     now = datetime.now(timezone(timedelta(hours=8)))  # 使用 UTC+8 时区
-    print("submit time:" + str(int((now - start_time).total_seconds())))
     return int((now - start_time).total_seconds())
 
 app = Flask(__name__)
@@ -149,13 +148,14 @@ def init_db():
             username TEXT NOT NULL,
             problem_name TEXT NOT NULL,
             score INTEGER NOT NULL,
-            submission_time INTEGER NOT NULL
+            submission_time INTEGER NOT NULL,
+            log TEXT NOT NULL
         )
     ''')
     conn.commit()
     conn.close()
 
-def upsert_submission(onlyid, username, problem_name, score, submission_time):
+def upsert_submission(onlyid, username, problem_name, score, submission_time, log):
     conn = sqlite3.connect('competition.db')
     c = conn.cursor()
 
@@ -167,18 +167,18 @@ def upsert_submission(onlyid, username, problem_name, score, submission_time):
 
     if row is None:
         c.execute('''
-            INSERT INTO submissions (onlyid, username, problem_name, score, submission_time)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (onlyid, username, problem_name, score, submission_time))
+            INSERT INTO submissions (onlyid, username, problem_name, score, submission_time, log)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (onlyid, username, problem_name, score, submission_time, log))
     else:
         existing_score = row[0]
         existing_time = row[1]
         if score > existing_score:
             c.execute('''
                 UPDATE submissions
-                SET score = ?, submission_time = ?, username = ?
+                SET score = ?, submission_time = ?, username = ?, log = ?
                 WHERE onlyid = ? AND problem_name = ?
-            ''', (score, submission_time, username, onlyid, problem_name))
+            ''', (score, submission_time, username, log, onlyid, problem_name))
 
     conn.commit()
     conn.close()
@@ -191,8 +191,9 @@ def submit_score():
     token = data.get('token')
     onlyid = data.get('onlyid')
     username = data.get('username')
+    log = data.get('log')
 
-    if not problem_name or score is None:
+    if not problem_name or score is None or not log:
         return jsonify({'error': 'Missing required parameters'}), 400
 
     if score < 0:
@@ -245,7 +246,7 @@ def submit_score():
         if not onlyid or not username:
             return jsonify({'error': 'Onlyid and username are required'}), 400
 
-    upsert_submission(onlyid, username, problem_name, score, submission_time)
+    upsert_submission(onlyid, username, problem_name, score, submission_time, log)
     return jsonify({'message': '提交成功'}), 200
 
 @app.route('/competition_info', methods=['GET'])
