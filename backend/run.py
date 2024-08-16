@@ -131,7 +131,7 @@ def get_username_by_onlyid(onlyid):
     return username
 
 def calculate_submission_time():
-    start_time = datetime.fromisoformat(START_TIME).replace(tzinfo=timezone.utc)
+    start_time = datetime.fromisoformat(START_TIME).astimezone(timezone(timedelta(hours=8)))
     now = datetime.now(timezone(timedelta(hours=8)))  # 使用 UTC+8 时区
     print("submit time:" + str(int((now - start_time).total_seconds())))
     return int((now - start_time).total_seconds())
