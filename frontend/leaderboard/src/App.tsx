@@ -15,7 +15,7 @@ interface LeaderboardEntry {
   onlyid: string;
   username: string;
   totalScore: number;
-  totalSubmissionTime: number;
+  latestSubmissionTime: number;
   scores: Record<string, number>;
   submissionTimes: Record<string, number>;
 }
@@ -52,26 +52,24 @@ const App: React.FC = () => {
                 onlyid,
                 username,
                 totalScore: 0,
-                totalSubmissionTime: 0,
+                latestSubmissionTime: 0,
                 scores: {},
                 submissionTimes: {},
               };
             }
 
-            // 更新该用户的分数和总提交时间
             userScores[onlyid].scores[problem] = score;
             userScores[onlyid].submissionTimes[problem] = submission_time;
             userScores[onlyid].totalScore += score;
-            userScores[onlyid].totalSubmissionTime += submission_time;
+            userScores[onlyid].latestSubmissionTime = Math.max(userScores[onlyid].latestSubmissionTime, submission_time);
           });
         });
 
-        // 将对象转换为数组，并根据总分和总提交时间进行排序
         const leaderboardData = Object.values(userScores).sort((a, b) => {
           if (b.totalScore !== a.totalScore) {
             return b.totalScore - a.totalScore; // 总分降序
           } else {
-            return a.totalSubmissionTime - b.totalSubmissionTime; // 总提交时间升序
+            return a.latestSubmissionTime - b.latestSubmissionTime;
           }
         });
 
