@@ -205,8 +205,8 @@ def submit_score():
         return jsonify({'error': 'Invalid problem name'}), 400
     
     # 检查提交时间是否在比赛时间内
-    start_time = datetime.fromisoformat(START_TIME).replace(tzinfo=timezone.utc)
-    end_time = datetime.fromisoformat(END_TIME).replace(tzinfo=timezone.utc)
+    start_time = datetime.fromisoformat(START_TIME).astimezone(timezone(timedelta(hours=8)))
+    end_time = datetime.fromisoformat(END_TIME).astimezone(timezone(timedelta(hours=8)))
     current_time = datetime.now(timezone(timedelta(hours=8)))
 
     if not (start_time <= current_time <= end_time):
@@ -281,6 +281,5 @@ def get_leaderboard():
     return jsonify(problem_leaderboards)
 
 init_db()
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=config['port'], debug=config['debug'])
