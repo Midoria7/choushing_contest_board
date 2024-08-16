@@ -15,7 +15,9 @@ interface LeaderboardEntry {
   onlyid: string;
   username: string;
   totalScore: number;
+  totalSubmissionTime: number;
   scores: Record<string, number>;
+  submissionTimes: Record<string, number>;
 }
 
 const App: React.FC = () => {
@@ -41,29 +43,37 @@ const App: React.FC = () => {
         // 合并同一用户（通过 onlyid）的成绩
         const userScores: Record<string, LeaderboardEntry> = {};
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Object.entries(data).forEach(([problem, entries]: [string, any]) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           entries.forEach((entry: any) => {
-            const { onlyid, username, score } = entry;
+            const { onlyid, username, score, submission_time } = entry;
 
             if (!userScores[onlyid]) {
               userScores[onlyid] = {
                 onlyid,
                 username,
                 totalScore: 0,
+                totalSubmissionTime: 0,
                 scores: {},
+                submissionTimes: {},
               };
             }
 
-            // 更新该用户的分数
+            // 更新该用户的分数和总提交时间
             userScores[onlyid].scores[problem] = score;
+            userScores[onlyid].submissionTimes[problem] = submission_time;
             userScores[onlyid].totalScore += score;
+            userScores[onlyid].totalSubmissionTime += submission_time;
           });
         });
 
-        // 将对象转换为数组，并根据总分进行排序
-        const leaderboardData = Object.values(userScores).sort((a, b) => b.totalScore - a.totalScore);
+        // 将对象转换为数组，并根据总分和总提交时间进行排序
+        const leaderboardData = Object.values(userScores).sort((a, b) => {
+          if (b.totalScore !== a.totalScore) {
+            return b.totalScore - a.totalScore; // 总分降序
+          } else {
+            return a.totalSubmissionTime - b.totalSubmissionTime; // 总提交时间升序
+          }
+        });
 
         setLeaderboard(leaderboardData);
       } catch (error) {
