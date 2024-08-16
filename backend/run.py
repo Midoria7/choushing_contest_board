@@ -281,5 +281,6 @@ def get_leaderboard():
     return jsonify(problem_leaderboards)
 
 init_db()
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=config['port'], debug=config['debug'])

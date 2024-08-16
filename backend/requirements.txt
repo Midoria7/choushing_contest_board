@@ -1,3 +1,4 @@
 Flask==2.2.2
 Flask-CORS==4.0.1
 requests==2.29.0
+Werkzeug==2.2.2

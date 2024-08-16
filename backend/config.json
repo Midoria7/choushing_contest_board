@@ -1,8 +1,8 @@
 {
     "port": 5000,
     "debug": true,
-    "competition_name": "ZXHPC 2024",
-    "description": "2024 周行高性能计算选拔赛",
+    "competition_name": "2024 周行高性能计算选拔赛",
+    "description": "赛时榜仅作参考，不作为评分依据。文档见 https://go.chouhsing.org/kpfo",
     "problems": [
       "pi",
       "knapsack"
