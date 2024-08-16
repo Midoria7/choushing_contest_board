@@ -203,6 +203,14 @@ def submit_score():
 
     if problem_name not in PROBLEMS:
         return jsonify({'error': 'Invalid problem name'}), 400
+    
+    # 检查提交时间是否在比赛时间内
+    start_time = datetime.fromisoformat(START_TIME).replace(tzinfo=timezone.utc)
+    end_time = datetime.fromisoformat(END_TIME).replace(tzinfo=timezone.utc)
+    current_time = datetime.now(timezone(timedelta(hours=8)))
+
+    if not (start_time <= current_time <= end_time):
+        return jsonify({'error': 'Submission time is outside of the competition period'}), 400
 
     submission_time = calculate_submission_time()
 

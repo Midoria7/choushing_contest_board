@@ -44,7 +44,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, proble
       cell: (info: any) => (
         <>
           <div>{parseFloat(info.getValue().toFixed(3))}</div>
-          <div className="text-xs text-gray-600">{formatTime(info.row.original.totalSubmissionTime)}</div>
+          <div className="text-xs text-gray-600">{formatTime(info.row.original.latestSubmissionTime)}</div>
         </>
       ),
     },
@@ -101,21 +101,34 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ leaderboard, proble
           ))}
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {table.getRowModel().rows.map((row, index) => (
-            <tr
-              key={row.id}
-              className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-200`}
-            >
-              {row.getVisibleCells().map(cell => (
-                <td
-                  key={cell.id}
-                  className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-800"
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
+          {table.getRowModel().rows.length > 0 ? (
+            table.getRowModel().rows.map((row, index) => (
+              <tr
+                key={row.id}
+                className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-200`}
+              >
+                {row.getVisibleCells().map(cell => (
+                  <td
+                    key={cell.id}
+                    className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-800"
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={columns.length} className="px-6 py-4 text-center text-gray-500">
+                <div className="text-xl font-semibold text-gray-700">
+                  当前还没有人提交
+                </div>
+                <div className="text-sm text-gray-500">
+                  No one has submitted yet
+                </div>
+              </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
