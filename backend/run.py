@@ -52,8 +52,10 @@ def get_feishu_token():
         print(data)
         raise Exception(f"Failed to get Feishu token: {data['msg']}")
 
+    expire_time = data["expire"]
+
     feishu_tenant_access_token = data["tenant_access_token"]
-    feishu_token_expiration = time.time() + 2 * 60 * 60 - 15
+    feishu_token_expiration = time.time() + expire_time - 15 * 60
 
     return feishu_tenant_access_token
 
