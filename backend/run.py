@@ -49,6 +49,7 @@ def get_feishu_token():
     data = response.json()
 
     if data["code"] != 0:
+        print(data)
         raise Exception(f"Failed to get Feishu token: {data['msg']}")
 
     feishu_tenant_access_token = data["tenant_access_token"]
@@ -84,6 +85,7 @@ def get_user_info_by_token(token):
     data = response.json()
 
     if data["code"] != 0:
+        print(data)
         raise Exception(f"Failed to get user info by token: {data['msg']}")
     
     if len(data["data"]["items"]) == 0:
@@ -123,6 +125,7 @@ def get_username_by_onlyid(onlyid):
     data = response.json()
 
     if data["code"] != 0 or len(data["data"]["items"]) == 0:
+        print(data)
         raise Exception(f"Failed to get username by onlyid: {data['msg']}")
 
     record = data["data"]["items"][0]

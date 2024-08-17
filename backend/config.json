@@ -4,10 +4,11 @@
     "competition_name": "2024 周行高性能计算选拔赛",
     "description": "赛时榜仅作参考，不作为评分依据。文档见 https://go.chouhsing.org/kpfo",
     "problems": [
+      "aplusb",
       "pi",
       "knapsack"
     ],
-    "start_time": "2024-08-01T15:00:00+08:00",
+    "start_time": "2024-08-17T15:00:00+08:00",
     "end_time": "2024-08-24T15:00:00+08:00",
 
     "is_auth_enabled": true,
